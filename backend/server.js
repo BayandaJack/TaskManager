@@ -1,6 +1,7 @@
 //Require express and initialize an express app instance
 const express = require("express");
 const app = express();
+const db = require('./models');
 //Require dotenv to enable reading env vars from .env file
 require('dotenv').config();
 
@@ -13,9 +14,16 @@ app.use((req, res, next) => {
     next();
 });
 
+// to parse data as json objects
+app.use(express.json());
+
 app.use('/tasks', tasks);
 
-//setup listening port
-app.listen(process.env.PORT, () => {
-    console.log(`Listening on port ${process.env.PORT}`);
-});
+//SECTION FOR USING SEQUELIZE ORM
+db.sequelize.sync()
+    .then(() => {
+        //setup listening port
+        app.listen(process.env.PORT, () => {
+            console.log(`Listening on port ${process.env.PORT}`);
+        });
+    });
