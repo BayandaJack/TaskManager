@@ -43,11 +43,9 @@ router.get('/:id', async (req, res) => {
 
     }
 
-    
 });
 
-
-
+// post a task
 router.post('/post', async (req, res) => {
     //extract body from req
     const { content, completed } = req.body;
@@ -66,21 +64,56 @@ router.post('/post', async (req, res) => {
     }
 });
 
-router.put('/post/:id', async (req, res) => {
+// update contents of a task
+router.patch('/post/:id', async (req, res) => {
     // first find the task
     const postId = req.params.id;
 
-    const task = await Tasks.findOne({
-        where: {
-            id: postId
-        }
-    })
+    // destructure contents of req body
+    const { content, completed } = req.body;
 
-    res.send("You're making an update to a post");
+    // find the task by id
+    try {
+        const task = await Tasks.findByPk(postId);
+
+        // update the task details
+        task.content = content;
+        task.completed = completed;
+
+        // save changes to task object
+        await task.save();
+
+        res.status(200).json({message: "Updated task successfully!"});
+        
+    } catch (error) {
+
+        res.status(400).json({message: error});
+        
+    }
+
 });
 
-router.delete('/post/:id', (req, res) => {
-    res.send("You want to delete a post");
+// delete a specific task
+router.delete('/post/:id', async (req, res) => {
+    // get id of task
+    const postID = req.params.id;
+
+    try {
+        // find & retrieve task in database
+        const task = await Tasks.findByPk(postID);
+
+        // remove task from db
+        task.destroy();
+
+        res.status(200).json({message: "Sucessfully deleted the task!"});
+
+        
+    } catch (error) {
+
+        res.status(400).json({message: error});
+        
+    }
+
 });
 
 // export the router
